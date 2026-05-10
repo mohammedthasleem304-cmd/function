@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>பூப்புனித நீராட்டு விழா</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #6B3A2A;
+            background-image: radial-gradient(circle at 20% 30%, #7A4B3A 2%, transparent 2.5%);
+            background-size: 45px 45px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Noto Serif Tamil', 'Latha', 'Mukta', 'Segoe UI', serif;
+            padding: 20px;
+        }
+
+        .scene {
+            max-width: 580px;
+            width: 100%;
+            perspective: 2000px;
+            perspective-origin: 50% 40%;
+        }
+
+        .card {
+            position: relative;
+            width: 100%;
+            background: #FFF9F0;
+            border-radius: 8px;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.4);
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 900" opacity="0.05"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.7"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(%23n)"/></svg>');
+            pointer-events: none;
+            border-radius: 8px;
+        }
+
+        .flap {
+            position: relative;
+            z-index: 20;
+            width: 100%;
+            background: #FFF5E8;
+            border-radius: 8px;
+            transform-origin: top center;
+            transition: transform 0.85s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .card.opened .flap {
+            transform: rotateX(-178deg);
+            pointer-events: none;
+        }
+
+        .front-cover {
+            background: linear-gradient(135deg, #FFF0E0, #FFE8D4);
+            border-radius: 8px;
+            padding: 25px 20px 50px;
+            text-align: center;
+            position: relative;
+            border: 1px solid #F0C8A0;
+            overflow: hidden;
+        }
+
+        .floral-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 15% 25%, rgba(255,150,175,0.3) 3%, transparent 3.5%),
+                radial-gradient(circle at 85% 70%, rgba(255,130,165,0.25) 4%, transparent 4.5%),
+                repeating-linear-gradient(45deg, rgba(255,160,185,0.07) 0px, rgba(255,160,185,0.07) 3px, transparent 3px, transparent 20px);
+            pointer-events: none;
+        }
+
+        /* Main Title - Only Tamil */
+        .main-title {
+            font-family: 'Noto Serif Tamil', 'Latha', serif;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #B8305A;
+            text-shadow: 1px 1px 3px rgba(200,80,100,0.2);
+            margin-bottom: 15px;
+            background: rgba(255,240,225,0.8);
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 50px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* FULL IMAGE - NOT ROUND ANYMORE */
+        .center-photo {
+            margin: 10px auto;
+            width: 200px;
+            height: 200px;
+            /* RECTANGLE / SQUARE - NOT ROUND */
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25), 0 0 0 3px #FFE8D0, 0 0 0 8px #F8C8A0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+            z-index: 2;
+            /* CHANGE THIS URL TO YOUR IMAGE URL */
+            background-image: url('https://via.placeholder.com/200x200/FFDDC0/FFDDC0?text=Your+Photo');
+        }
+
+        .you-invited {
+            font-family: 'Georgia', serif;
+            font-size: 1rem;
+            color: #B83A50;
+            letter-spacing: 2px;
+            background: rgba(255,235,215,0.8);
+            display: inline-block;
+            padding: 4px 20px;
+            border-radius: 30px;
+            position: relative;
+            z-index: 2;
+            margin-top: 12px;
+        }
+
+        .butterfly-lock {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 66px;
+            cursor: pointer;
+            z-index: 35;
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.25));
+            transition: transform 0.1s;
+        }
+
+        .butterfly-lock:active {
+            transform: translateX(-50%) scale(0.94);
+        }
+
+        .card.opened .butterfly-lock {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .inside-content {
+            padding: 25px 22px 35px;
+            background: #FFFBF3;
+            border-radius: 0 0 8px 8px;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.6s ease 0.25s, transform 0.7s ease 0.25s;
+        }
+
+        .card.opened .inside-content {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .invitation-tamil {
+            font-family: 'Noto Serif Tamil', 'Latha', 'Mukta', serif;
+            font-size: 13px;
+            line-height: 1.65;
+            color: #2E241F;
+        }
+
+        .bismillah {
+            text-align: center;
+            font-size: 15px;
+            font-weight: bold;
+            color: #6B3A2A;
+            margin-bottom: 8px;
+        }
+
+        .tamil-block {
+            background: #FFF9EF;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border-left: 4px solid #E87A5E;
+            margin-bottom: 16px;
+        }
+
+        .names-highlight {
+            font-size: 16px;
+            font-weight: bold;
+            color: #B83A50;
+            text-align: center;
+            margin: 12px 0;
+            line-height: 1.8;
+        }
+
+        .datetime-box {
+            background: #FDF0E4;
+            border-radius: 14px;
+            padding: 12px;
+            text-align: center;
+            margin: 16px 0;
+            border: 1px solid #F0D0B8;
+        }
+
+        .contact-box {
+            background: #FFF5EA;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 12px 0;
+            font-size: 15px;
+            font-weight: bold;
+            color: #6B3A2A;
+        }
+
+        .location-section {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 18px 0 10px;
+            background: #FDF4E8;
+            padding: 12px;
+            border-radius: 14px;
+            cursor: pointer;
+        }
+
+        .qr-code {
+            width: 75px;
+            height: 75px;
+            background: white;
+            padding: 6px;
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
+
+        .address-details {
+            font-size: 11px;
+            line-height: 1.4;
+            color: #4A3628;
+        }
+
+        .whatsapp-btn-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn-wa {
+            background: #25D366;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: inherit;
+            box-shadow: 0 4px 12px rgba(37,211,102,0.4);
+        }
+
+        .btn-wa:active {
+            transform: scale(0.96);
+        }
+
+        .flower-particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 200;
+            opacity: 0.5;
+            animation: floatUp 11s linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
+        }
+
+        @media (max-width: 550px) {
+            .main-title { font-size: 1.4rem; }
+            .center-photo { width: 160px; height: 160px; }
+            .invitation-tamil { font-size: 11.5px; }
+            .btn-wa { padding: 12px 24px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="scene">
+    <div class="card" id="card">
+        <div class="flap" id="flap">
+            <div class="front-cover">
+                <div class="floral-bg"></div>
+                
+                <!-- Only Tamil Title -->
+                <div class="main-title">பூப்புனித நீராட்டு விழா</div>
+                
+                <!-- YOUR FULL PHOTO - SQUARE/RECTANGLE, NOT ROUND -->
+                <div class="center-photo" id="userPhoto"></div>
+                
+                <div class="you-invited">✨ You're Invited ✨</div>
+                
+                <div class="butterfly-lock" id="butterflyLock">
+                    <svg viewBox="0 0 100 90" fill="none">
+                        <defs>
+                            <linearGradient id="wing" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#FFB847"/>
+                                <stop offset="50%" stop-color="#FF7055"/>
+                                <stop offset="100%" stop-color="#D4454A"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M50 42 C32 15,8 12,10 30 C12 48,28 50,38 54 C30 60,18 72,26 80 C34 88,48 74,50 62Z" fill="url(#wing)" stroke="#B82D40" stroke-width="1"/>
+                        <path d="M50 42 C68 15,92 12,90 30 C88 48,72 50,62 54 C70 60,82 72,74 80 C66 88,52 74,50 62Z" fill="url(#wing)" stroke="#B82D40" stroke-width="1"/>
+                        <ellipse cx="50" cy="52" rx="6" ry="18" fill="#5E2520"/>
+                        <circle cx="50" cy="36" r="3" fill="#FFD070"/>
+                        <path d="M43 28 Q36 16,32 20" stroke="#5E2520" stroke-width="1.5" fill="none"/>
+                        <path d="M57 28 Q64 16,68 20" stroke="#5E2520" stroke-width="1.5" fill="none"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="inside-content">
+            <div class="invitation-tamil">
+                <div class="bismillah">❝ எல்லாப் புகழும் இறைவனுக்கே ❞</div>
+                <div class="bismillah" style="font-size: 13px;">பிஸ்மில்லாஹிர் ஹிர்ரஹ்மான் நிர்ரஹீம்</div>
+                
+                <div style="text-align: center; font-size: 15px; font-weight: bold; color: #B83A50; margin: 10px 0;">பூப்புனித நீராட்டு விழா (ன்) சீர் அழைப்பிதழ்</div>
+
+                <div class="tamil-block">
+                    அன்புடையீர், அஸ்ஸலாமு அலைக்கும்<br><br>
+                    அளவற்ற அருளாலும் நிறைந்த அன்புடையோனாகிய எல்லாம் வல்ல
+                    அல்லாஹ்வின் பேரருளாலும் இறைத்தூதர் நபிகள் நாயகம் (ஸல்) அவர்களின்
+                    துஆ பரக்கத்தாலும் நிகழும் ஹிஜ்ரி 1447ம் ஆண்டு துல்கதா பிறை 29ம் நாள்
+                    <strong>(17.05.2026)</strong> ஞாயிற்றுக்கிழமை காலை 11.30 மணி முதல் 12.30 மணிக்குள்
+                    முபாரக்கான வேளையில்
+                </div>
+
+                <div class="tamil-block">
+                    ஊத்துக்குளி R.S. (மர்ஹூம்) S.A.பாபு அவர்களின் பேத்தியும், பேரனும் ஆகிய
+                    B.செளகத் அலி மகளுமாகிய தீன் குலச் செல்வி, செல்வன்களும்
+                    
+                    <div class="names-highlight">
+                        ✦ S. இர்பான பேகம் ✦<br>
+                        ✦ S. முகமது அர்சாத் ✦<br>
+                        ✦ S. முகமது தஸ்லீம் ✦
+                    </div>
+
+                    ஆகியோரது <strong>ஷீர் விழா</strong>
+                </div>
+
+                <div class="datetime-box">
+                    <strong>📍 விழா இடம்:</strong><br>
+                    திருப்பூர், காங்கயம் ரோடு, வேலன் ஹோட்டல் பஸ் ஸ்டாப், காயத்ரி ஹோட்டல்<br>
+                    அருகில் அமைந்துள்ள <strong>அல்ராசி மஹால்</strong>
+                </div>
+
+                <div class="tamil-block">
+                    நடைபெற உள்ளதால் தாங்கள் தங்கள் சுற்றமும் நட்பும் சூழ
+                    வருகை தந்து துஆ செய்து (வாழ்த்தியருள)
+                    அன்புடன் அழைக்கிறோம்
+                </div>
+
+                <div style="text-align: center; margin: 12px 0 8px;">
+                    <strong>தங்கள் அன்புள்ள</strong><br>
+                    <span style="font-size: 15px; color: #B83A50;">B. செளகத் அலி</span><br>
+                    <span style="font-size: 15px; color: #B83A50;">S. வாஹிதா பேகம்</span>
+                </div>
+
+                <div class="contact-box">
+                    📞 83443 99714 &nbsp;&nbsp;|&nbsp;&nbsp; 81899 28652
+                </div>
+
+                <div style="text-align: center; margin: 10px 0 6px;">
+                    <strong>தங்கள் நல்வரவை விரும்பும்</strong>
+                </div>
+
+                <div class="tamil-block" style="background: #FFF5EA;">
+                    S. அம்ரா தாஜ் &nbsp;&nbsp; S. அஸ்மா தாஜ்<br>
+                    A. ரம்லானா பார்வீன் &nbsp;&nbsp; A. ஆஜிரா பார்வீன்<br>
+                    F. அசாருதீன் &nbsp;&nbsp; F. ருக்சானா<br>
+                    A. ருக்கய்யா &nbsp;&nbsp; A. ஹூமைரா<br>
+                    A. ஹாதியா &nbsp;&nbsp; R. சையது அஜீல்
+                </div>
+
+                <!-- QR Location - UPDATED -->
+<div class="location-section" id="locationClick">
+    <div class="qr-code">
+        <svg viewBox="0 0 100 100">
+            <rect width="100" height="100" fill="white"/>
+            <rect x="20" y="20" width="25" height="25" fill="black"/>
+            <rect x="55" y="20" width="25" height="25" fill="black"/>
+            <rect x="20" y="55" width="25" height="25" fill="black"/>
+            <rect x="55" y="55" width="12" height="12" fill="black"/>
+            <rect x="75" y="55" width="8" height="8" fill="black"/>
+            <rect x="55" y="75" width="8" height="8" fill="black"/>
+            <rect x="75" y="75" width="10" height="10" fill="black"/>
+        </svg>
+    </div>
+    <div class="address-details">
+        <strong>📍 திருப்பூர், காங்கயம் ரோடு, வேலன் ஹோட்டல் பஸ் ஸ்டாப், காயத்ரி ஹோட்டல்<br>
+                    அருகில் அமைந்துள்ள <strong>அல்ராசி மஹால்<br>
+        <span style="font-size: 9px;">(கிளிக் செய்து மேப்ஸில் திறக்க)</span>
+    </div>
+</div>
+                </div>
+            </div>
+
+            <div class="whatsapp-btn-container">
+                <button class="btn-wa" id="whatsappBtn">
+                    💬 WhatsApp - வருகையை உறுதி செய்யுங்கள்
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const card = document.getElementById('card');
+        const butterfly = document.getElementById('butterflyLock');
+        let isOpened = false;
+
+        // === IMPORTANT: CHANGE YOUR PHOTO URL HERE ===
+        // Replace this URL with your actual image URL
+        // Example: "https://yourwebsite.com/your-photo.jpg"
+        const yourPhotoUrl = "photo.jpeg";
+        
+        // Set the photo (FULL IMAGE, NOT ROUND)
+        const photoDiv = document.getElementById('userPhoto');
+        if(photoDiv && yourPhotoUrl) {
+            photoDiv.style.backgroundImage = "url('" + yourPhotoUrl + "')";
+            photoDiv.style.backgroundSize = "cover";
+            photoDiv.style.backgroundPosition = "center";
+        }
+
+        function openInvitation() {
+            if (isOpened) return;
+            isOpened = true;
+            card.classList.add('opened');
+            
+            const svg = butterfly?.querySelector('svg');
+            if (svg) {
+                svg.style.transform = 'scale(1.15) rotate(8deg)';
+                setTimeout(() => { if(svg) svg.style.transform = ''; }, 200);
+            }
+            
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = 340;
+                gain.gain.value = 0.06;
+                osc.start();
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.35);
+                osc.stop(audioCtx.currentTime + 0.3);
+                audioCtx.resume().catch(e=>{});
+            } catch(e) {}
+        }
+
+        let startX = null;
+        
+        function handleStart(e) {
+            e.preventDefault();
+            const point = e.touches ? e.touches[0] : e;
+            startX = point.clientX;
+            butterfly.style.transform = 'translateX(-50%) scale(0.92)';
+        }
+        
+        function handleMove(e) {
+            if (startX === null) return;
+            const point = e.touches ? e.touches[0] : e;
+            if (Math.abs(point.clientX - startX) > 20) {
+                openInvitation();
+                resetDrag();
+            }
+        }
+        
+        function handleEnd() {
+            if (startX !== null) {
+                resetDrag();
+                if (!isOpened) openInvitation();
+            }
+            resetDrag();
+        }
+        
+        function resetDrag() {
+            startX = null;
+            butterfly.style.transform = 'translateX(-50%) scale(1)';
+        }
+        
+        butterfly.addEventListener('mousedown', handleStart);
+        butterfly.addEventListener('touchstart', handleStart, { passive: false });
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('touchmove', handleMove, { passive: false });
+        window.addEventListener('mouseup', handleEnd);
+        window.addEventListener('touchend', handleEnd);
+        
+        butterfly.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if(!isOpened) openInvitation();
+        });
+
+        const mapsUrl = "https://maps.app.goo.gl/k5eojksVqqJTJF5d9";
+        document.getElementById('locationClick').addEventListener('click', () => {
+            window.open(mapsUrl, '_blank');
+        });
+
+        const phone = "918344399714";
+        const whatsappMsg = "Vanakkam, பூப்புனித நீராட்டு விழாவிற்கு வருகிறேன். நன்றி! 🙏✨";
+        
+        document.getElementById('whatsappBtn').addEventListener('click', () => {
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(whatsappMsg)}`, '_blank');
+        });
+
+        function createFlower() {
+            const flower = document.createElement('div');
+            flower.classList.add('flower-particle');
+            const size = 15 + Math.random() * 25;
+            flower.style.width = size + 'px';
+            flower.style.height = size + 'px';
+            flower.style.left = Math.random() * 100 + '%';
+            flower.style.animationDuration = 8 + Math.random() * 12 + 's';
+            flower.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FFB7C5"><path d="M12,2C11,6,6,8,6,12c0,3,4,5,6,5s6-2,6-5C18,8,13,6,12,2z M12,17c-3,0-5-2-5-4c0-2,2-4,5-4s5,2,5,4C17,15,15,17,12,17z"/><circle cx="12" cy="12" r="2"/></svg>')`;
+            flower.style.backgroundSize = 'contain';
+            flower.style.backgroundRepeat = 'no-repeat';
+            document.body.appendChild(flower);
+            setTimeout(() => flower.remove(), 12000);
+        }
+        
+        setInterval(() => {
+            if(isOpened) {
+                for(let i=0;i<2;i++) createFlower();
+            } else if(Math.random() < 0.3) {
+                createFlower();
+            }
+        }, 2200);
+        
+        for(let i=0;i<4;i++) setTimeout(createFlower, i * 400);
+    })();
+</script>
+</body>
+</html>
